@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/chainguard-dev/clog"
+	"github.com/chainguard-dev/tw/pkg/commands/daemoncheck"
 	"github.com/chainguard-dev/tw/pkg/commands/dgrep"
 	"github.com/chainguard-dev/tw/pkg/commands/helm"
 	"github.com/chainguard-dev/tw/pkg/commands/kgrep"
@@ -19,13 +20,14 @@ import (
 )
 
 var cmds = map[string]*cobra.Command{
-	"dgrep":          dgrep.Command(),
-	"sfuzz":          sfuzz.Command(),
-	"kgrep":          kgrep.Command(),
-	"kimages":        kimages.Command(),
-	"wassert":        wassert.Command(),
-	"shu":            shu.Command(),
-	"helm-inventory": helm.Command(),
+	"daemon-check-output": daemoncheck.Command(),
+	"dgrep":               dgrep.Command(),
+	"sfuzz":               sfuzz.Command(),
+	"kgrep":               kgrep.Command(),
+	"kimages":             kimages.Command(),
+	"wassert":             wassert.Command(),
+	"shu":                 shu.Command(),
+	"helm-inventory":      helm.Command(),
 }
 
 func main() {
