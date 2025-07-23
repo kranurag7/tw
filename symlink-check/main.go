@@ -163,7 +163,7 @@ func info(msg string) {
 
 func showHelp() {
 	fmt.Printf(`Usage: %s [OPTIONS]
-all
+
 Tool to check for broken/dangling symlinks in the filesystem.
 
 Options:
@@ -171,12 +171,14 @@ Options:
   --paths=PATH, --paths PATH    Specify paths to check (default: /)
   --packages=PKG, --packages PKG
                                Specify packages to check
-  --relative-only              Only check relative symlinks, ignore absolute ones
+  --allow-dangling             Allow dangling symlinks
+  --allow-absolute             Allow absolute symlinks
 
 Examples:
   %s --paths=/usr/bin
   %s --packages=bash
-`, progName, progName, progName)
+  %s --allow-dangling --paths=/usr/bin
+`, progName, progName, progName, progName)
 	os.Exit(0)
 }
 
@@ -278,14 +280,21 @@ func checkSymlink(link string, result *Result, allowDangling, allowAbsolute bool
 
 	// Check if symlink target exists and is accessible
 	if _, err := os.Stat(link); err != nil {
-		if os.IsNotExist(err) {
-			if target == "" {
-				result.AddFail(fmt.Sprintf("points to empty target: %s", link))
-			} else {
-				result.AddFail(fmt.Sprintf("points to non-existent target: %s -> %s", link, target))
-			}
-		} else {
+		if !os.IsNotExist(err) {
 			result.AddFail(fmt.Sprintf("cannot access target: %s -> %s (%v)", link, target, err))
+			return
+		}
+		
+		// Handle dangling symlinks (target doesn't exist)
+		if allowDangling {
+			result.AddPass(fmt.Sprintf("dangling symlink (allowed): %s -> %s", link, target))
+			return
+		}
+		
+		if target == "" {
+			result.AddFail(fmt.Sprintf("points to empty target: %s", link))
+		} else {
+			result.AddFail(fmt.Sprintf("points to non-existent target: %s -> %s", link, target))
 		}
 		return
 	}
