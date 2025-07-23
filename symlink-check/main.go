@@ -273,7 +273,7 @@ func checkSymlink(link string, result *Result, allowDangling, allowAbsolute bool
 			result.AddFail(fmt.Sprintf("absolute symlink: %s -> %s", link, target))
 			return
 		}
-	} else if targetEscapesTree(link, target) {
+	} else if targetEscapesTree(target, link) {
 		result.AddFail(fmt.Sprintf("relative symlink escapes root: %s -> %s", link, target))
 		return
 	}
@@ -310,26 +310,26 @@ func checkSymlink(link string, result *Result, allowDangling, allowAbsolute bool
 	result.AddPass(fmt.Sprintf("%s -> %s", link, target))
 }
 
-// targetEscapesTree returns true when opening the relative symlink `src` with the
+// targetEscapesTree returns true when opening the relative symlink `link` with the
 // destination `target` would result in reading a file filesystem tree rooted at '.'
 //
-// src should not start with a slash or contain any '.' or '..' components.
 // target should be a relative symlink (not starting with a '/').
+// link should not start with a slash or contain any '.' or '..' components.
 //
 //		Examples:
-//		 -  targetEscapesTree("usr/bin/foo", "../../usr/bin/bar") -> false
-//	  -  targetEscapesTree("etc/passwd", "../../../../../../etc/passwd") -> true
-func targetEscapesTree(src, target string) bool {
+//		 -  targetEscapesTree("../../usr/bin/bar", "usr/bin/foo") -> false
+//	  -  targetEscapesTree("../../../../../../etc/passwd", "etc/passwd") -> true
+func targetEscapesTree(target, link string) bool {
 	// If target is absolute, it escapes the tree
 	if filepath.IsAbs(target) {
 		return true
 	}
 
 	// Get the directory of the source symlink
-	srcDir := filepath.Dir(src)
+	linkDir := filepath.Dir(link)
 
 	// Join the source directory with the target to get the absolute path
-	absTarget := filepath.Join(srcDir, target)
+	absTarget := filepath.Join(linkDir, target)
 
 	// Clean the path to resolve all ".." and "." components
 	cleanTarget := filepath.Clean(absTarget)

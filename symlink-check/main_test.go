@@ -247,9 +247,9 @@ func TestTargetEscapesTree(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := targetEscapesTree(tt.src, tt.target)
+			result := targetEscapesTree(tt.target, tt.src)
 			if result != tt.expected {
-				t.Errorf("targetEscapesTree(%q, %q) = %v, expected %v", tt.src, tt.target, result, tt.expected)
+				t.Errorf("targetEscapesTree(%q, %q) = %v, expected %v", tt.target, tt.src, result, tt.expected)
 			}
 		})
 	}
